@@ -1,4 +1,4 @@
-See http://www.dnsmadeeasy.com/enterprisedns/api.html for API documentation.
+See http://www.dnsmadeeasy.com/enterprisedns/api.html for API documentation. Please note this ruby script is based off the sample perl script provided by DNS Made Easy
 
 Config File: a file named dnsmeapi.properties must exist in your current directory, with the following contents:
 apiKey=ReplaceWithYourAPIKey
