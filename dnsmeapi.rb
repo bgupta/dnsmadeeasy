@@ -54,4 +54,4 @@ apiKeyHeader = "x-dnsme-apiKey:" + apiKey;
 hmacHeader = "x-dnsme-hmac:" + hmac;
 requestDateHeader = "x-dnsme-requestDate:" + "\"" + requestDate + "\"";
 
-puts `curl #{ARGV.join(" ")} --header #{apiKeyHeader} --header #{hmacHeader} --header #{requestDateHeader}`
+puts `curl -s #{ARGV.join(" ")} --header #{apiKeyHeader} --header #{hmacHeader} --header #{requestDateHeader}`
