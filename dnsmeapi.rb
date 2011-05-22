@@ -48,7 +48,7 @@ prophash = load_properties dmepropertyfile
 apiKey = prophash["apiKey"]
 secretKey = prophash["secretKey"]
 
-hmac = OpenSSL::HMAC.hexdigest(OpenSSL::Digest::Digest.new('sha1'), secretKey, requestDate)
+hmac = OpenSSL::HMAC.hexdigest('sha1', secretKey, requestDate)
 
 apiKeyHeader = "x-dnsme-apiKey:" + apiKey;
 hmacHeader = "x-dnsme-hmac:" + hmac;
