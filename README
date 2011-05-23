@@ -1,5 +1,7 @@
 See http://www.dnsmadeeasy.com/enterprisedns/api.html for API documentation. Please note this ruby script is based off the sample perl script provided by DNS Made Easy
 
+For testing, DNS Made Easy is offering sandbox accounts: http://sandbox.dnsmadeeasy.com/
+
 Config File: a file named dnsmeapi.properties must exist in your current directory, with the following contents:
 apiKey=ReplaceWithYourAPIKey
 secretKey=ReplaceWithYourSecretKey
@@ -16,6 +18,11 @@ Get the details of a single record:
  dnsmeapi.rb \
  http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records/recordidnumber \
  --header accept:application/json
+Create a new RECORD, where the contents of the file record.txt contains a JSON 
+representation of the record
+ dnsmeapi.rb -d @record.txt \
+ http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records -X POST \
+ --header content-type:application/json
 
 Please note the output JSON is dense. If you would like to make it easier to read you can pipe the output to one of the following tools:
 | prettify_json.rb # comes with the json ruby gem ("gem install json")
