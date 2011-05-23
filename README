@@ -6,9 +6,16 @@ secretKey=ReplaceWithYourSecretKey
 
 Usage Examples:
 
-Get a list of domains: dnsmeapi.rb http://api.dnsmadeeasy.com/V1.2/domains --header accept:application/json|prettify_json.rb 
-Get a list of records in a single zone: dnsmeapi.rb http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records --header accept:application/json|prettify_json.rb 
-Get the details of a single record: dnsmeapi.rb http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records/recordidnumber --header accept:application/json|prettify_json.rb 
+Get a list of domains:
+ dnsmeapi.rb http://api.dnsmadeeasy.com/V1.2/domains --header \
+ accept:application/json
+Get a list of records in a single zone:
+ dnsmeapi.rb http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records \
+ --header accept:application/json
+Get the details of a single record:
+ dnsmeapi.rb \
+ http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records/recordidnumber \
+ --header accept:application/json
 
 Please note the output JSON is dense. If you would like to make it easier to read you can pipe the output to one of the following tools:
 | prettify_json.rb # comes with the json ruby gem ("gem install json")
