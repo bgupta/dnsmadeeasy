@@ -14,6 +14,10 @@ Get a list of domains:
 Get a list of records in a single zone:
  dnsmeapi.rb http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records \
  --header accept:application/json
+Get a list of records of a specific record type in a single zone (e.g. - CNAME):
+ dnsmeapi.rb \
+ http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records?type=cname \
+ --header accept:application/json
 Get the details of a single record:
  dnsmeapi.rb \
  http://api.dnsmadeeasy.com/V1.2/domains/yourdomain.com/records/recordidnumber \
