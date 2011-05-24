@@ -6,6 +6,13 @@ Config File: a file named dnsmeapi.properties must exist in your current directo
 apiKey=ReplaceWithYourAPIKey
 secretKey=ReplaceWithYourSecretKey
 
+Files: 
+------
+README - This document
+LICENSE - GPLv2 License
+dnsmeapi.rb - Ruby port of DNS Made Easy's sample perl script
+dme.rb - Sample script accessing DNS Made Easy's API using entirely native Ruby methods
+
 Usage Examples:
 
 Get a list of domains:
