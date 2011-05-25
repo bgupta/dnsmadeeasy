@@ -59,5 +59,9 @@ response = RestClient.get 'http://api.dnsmadeeasy.com/V1.2/domains/brandorr.com/
                           :accept =>:json
 results = JSON.parse(response.to_str)
 nameresults = results.select {|x| x["name"] == "www" and x["type"] == "A"}
-#puts JSON.pretty_generate(nameresults)
+
+#Prints the entire returned record set in "Pretty JSON"
+puts JSON.pretty_generate(nameresults)
+
+# Prints the recordids of the returned array of records
 nameresults.each {|x| puts x["id"]}
