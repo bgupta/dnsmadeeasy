@@ -1,4 +1,4 @@
-#!/opt/local/bin/ruby
+#!/usr/bin/env ruby
 # Copyright (C) 2011 Vijay Brian Gupta brian.gupta@brandorr.com
 #
 # This program is free software; you can redistribute it and/or
