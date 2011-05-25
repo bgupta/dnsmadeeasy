@@ -21,11 +21,9 @@
 # Make sure the dnsmeapi.properties file is available in the location from which you run this
 
 require 'time'
-require 'uri'
 require 'openssl'
 require 'rest_client'
 require 'json'
-require 'set'
 
 dmepropertyfile = "dnsmeapi.properties"
 requestDate = Time.now.httpdate
