@@ -52,16 +52,12 @@ secretKey = prophash["secretKey"]
 
 hmac = OpenSSL::HMAC.hexdigest('sha1', secretKey, requestDate)
 
-apiKeyHeader = "x-dnsme-apiKey:" + apiKey;
-hmacHeader = "x-dnsme-hmac:" + hmac;
-requestDateHeader = "x-dnsme-requestDate:" + "\"" + requestDate + "\"";
-
-response = RestClient.get 'http://api.dnsmadeeasy.com/V1.2/domains/brandorr.com/records', :"x-dnsme-apiKey" => apiKey, :"x-dnsme-hmac" => hmac, :"x-dnsme-requestDate" => requestDate, :accept =>:json
+response = RestClient.get 'http://api.dnsmadeeasy.com/V1.2/domains/brandorr.com/records', 
+                          :"x-dnsme-apiKey" => apiKey, 
+                          :"x-dnsme-hmac" => hmac, 
+                          :"x-dnsme-requestDate" => requestDate, 
+                          :accept =>:json
 results = JSON.parse(response.to_str)
-#puts JSON.pretty_generate(results)
-#puts results[1]["name"]
-#puts JSON.pretty_generate(results.select {|x| x["name"] == "www"})
-#puts JSON.pretty_generate(results.select {|x| x["name"] == "www" and x["type"] == "A"})
 nameresults = results.select {|x| x["name"] == "www" and x["type"] == "A"}
-#puts nameresults
+#puts JSON.pretty_generate(nameresults)
 nameresults.each {|x| puts x["id"]}
