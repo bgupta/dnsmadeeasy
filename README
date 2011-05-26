@@ -12,6 +12,7 @@ README - This document
 LICENSE - GPLv2 License
 dnsmeapi.rb - Ruby port of DNS Made Easy's sample perl script
 dme.rb - Sample script accessing DNS Made Easy's API using entirely native Ruby methods
+ec2-set-dme-dns.rb - Registers an EC2 hosts name with DNS Made Easy, if it doesn't exist or if it is set incorrectly
 
 Usage Examples:
 
