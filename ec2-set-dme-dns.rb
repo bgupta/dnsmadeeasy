@@ -35,7 +35,7 @@ requestDate = Time.now.httpdate
 instance_data_url = "http://169.254.169.254/latest/meta-data/"
 
 fqdn = Socket.gethostbyname(Socket.gethostname).first
-publicname = open(instance_data_url + 'public-hostname').read
+publicname = open(instance_data_url + 'public-hostname').read + "."
 privatename = open(instance_data_url + 'local-hostname').read
 instance_id = open(instance_data_url + 'instance-id').read
 hostname = fqdn.split(".")[0]
