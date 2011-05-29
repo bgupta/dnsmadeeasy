@@ -43,23 +43,23 @@ domainname = fqdn.split(".")[1..-1].join(".")
 
 intname = hostname + "-internal." + domainname
 
- def load_properties(propertyfile)
-    properties = {}
-    File.open(propertyfile, 'r') do |propertyfile|
-      propertyfile.read.each_line do |line|
-        line.strip!
-        if (line[0] != ?# and line[0] != ?=)
-          i = line.index('=')
-          if (i)
-            properties[line[0..i - 1].strip] = line[i + 1..-1].strip
-          else
-            properties[line] = ''
-          end
+def load_properties(propertyfile)
+  properties = {}
+  File.open(propertyfile, 'r') do |propertyfile|
+    propertyfile.read.each_line do |line|
+      line.strip!
+      if (line[0] != ?# and line[0] != ?=)
+        i = line.index('=')
+        if (i)
+          properties[line[0..i - 1].strip] = line[i + 1..-1].strip
+        else
+          properties[line] = ''
         end
       end
     end
-    properties
   end
+  properties
+end
 
 prophash = load_properties dmepropertyfile
 apiKey = prophash["apiKey"]
@@ -67,32 +67,32 @@ secretKey = prophash["secretKey"]
 hmac = OpenSSL::HMAC.hexdigest('sha1', secretKey, requestDate)
 
 def get_cname_record(name, domainname, apiKey,hmac,requestDate)
-   dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
-   response = RestClient.get dme_rest_url + domainname + "/records",
+  dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
+  response = RestClient.get dme_rest_url + domainname + "/records",
                           :"x-dnsme-apiKey" => apiKey,
                           :"x-dnsme-hmac" => hmac,
                           :"x-dnsme-requestDate" => requestDate,
                           :accept =>:json
-   nameresults = JSON.parse(response.to_str).select {
-                 |x| x["name"] == name and x["type"] == "CNAME"}
-   nameresults[0]
+  nameresults = JSON.parse(response.to_str).select {
+                |x| x["name"] == name and x["type"] == "CNAME"}
+  nameresults[0]
 end
 
 def post_cname_record(record, domainname, apiKey,hmac,requestDate)
-   dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
-   response = RestClient.post dme_rest_url + domainname + "/records",
+  dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
+  response = RestClient.post dme_rest_url + domainname + "/records",
                           record.to_json,
                           :"x-dnsme-apiKey" => apiKey,
                           :"x-dnsme-hmac" => hmac,
                           :"x-dnsme-requestDate" => requestDate,
                           :"accept" =>:json,
                           :"content-type" =>:json
-   JSON.parse(response)
+  JSON.parse(response)
 end
 
 def delete_cname_record(id, domainname, apiKey,hmac,requestDate)
-   dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
-   response = RestClient.delete dme_rest_url + domainname + "/records/" + id.to_s,
+  dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
+  response = RestClient.delete dme_rest_url + domainname + "/records/" + id.to_s,
                           :"x-dnsme-apiKey" => apiKey,
                           :"x-dnsme-hmac" => hmac,
                           :"x-dnsme-requestDate" => requestDate,
