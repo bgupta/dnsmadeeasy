@@ -31,8 +31,7 @@ require 'socket'
 require 'open-uri'
 
 class CNameRecord
-  dmepropertyfile = "dnsmeapi.properties"
-  def initialize 
+  def initialize(args) 
     @@instance_data_url = "http://169.254.169.254/latest/meta-data/"
     @@dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
 
@@ -46,6 +45,7 @@ class CNameRecord
     #intname = hostname + "-internal." + @domainname
   end
 
+  dmepropertyfile = "dnsmeapi.properties"
   def load_properties(propertyfile)
     properties = {}
     File.open(propertyfile, 'r') do |propertyfile|
@@ -104,10 +104,11 @@ end
 
 myhost = CNameRecord.get_cname_record(hostname)
 
-if myhost && myhost["data"] == publicname
-  puts [hostname, @domainname].join(".") + " is correct in DNS"
-  exit
-end
+#if myhost && myhost["data"] == publicname
+#  puts [hostname, @domainname].join(".") + " is correct in DNS"
+#  exit
+#end
+
 #if myhost
 #  puts "Record is not set correctly. Deleting the record." 
 #  delete_cname_record(myhost["id"])
