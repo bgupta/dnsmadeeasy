@@ -32,18 +32,19 @@ require 'open-uri'
 
 class CNameRecord
   dmepropertyfile = "dnsmeapi.properties"
+  def initialize 
+    @@instance_data_url = "http://169.254.169.254/latest/meta-data/"
+    @@dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
 
-  @@instance_data_url = "http://169.254.169.254/latest/meta-data/"
-  @@dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
+    fqdn = Socket.gethostbyname(Socket.gethostname).first
+    publicname = open(@@instance_data_url + 'public-hostname').read + "."
+    privatename = open(@@instance_data_url + 'local-hostname').read
+    instance_id = open(@@instance_data_url + 'instance-id').read
+    hostname = fqdn.split(".")[0]
+    @domainname = fqdn.split(".")[1..-1].join(".")
 
-  fqdn = Socket.gethostbyname(Socket.gethostname).first
-  publicname = open(@@instance_data_url + 'public-hostname').read + "."
-  privatename = open(@@instance_data_url + 'local-hostname').read
-  instance_id = open(@@instance_data_url + 'instance-id').read
-  hostname = fqdn.split(".")[0]
-  @domainname = fqdn.split(".")[1..-1].join(".")
-
-  #intname = hostname + "-internal." + @domainname
+    #intname = hostname + "-internal." + @domainname
+  end
 
   def load_properties(propertyfile)
     properties = {}
@@ -101,19 +102,21 @@ class CNameRecord
   end
 end
 
-myhost = get_cname_record(hostname)
+myhost = CNameRecord.get_cname_record(hostname)
+
 if myhost && myhost["data"] == publicname
   puts [hostname, @domainname].join(".") + " is correct in DNS"
   exit
 end
-if myhost
-  puts "Record is not set correctly. Deleting the record." 
-  delete_cname_record(myhost["id"])
-end
-puts [hostname, @domainname].join(".") + " doesn't exist in DNS. Adding."
-dnsrecord = { "name" => hostname,
-              "type" => "CNAME",
-              "data" => publicname,
-              "gtdLocation" => "DEFAULT",
-              "ttl" => 300 }
-post_cname_record(dnsrecord)
+#if myhost
+#  puts "Record is not set correctly. Deleting the record." 
+#  delete_cname_record(myhost["id"])
+#end
+#puts [hostname, @domainname].join(".") + " doesn't exist in DNS. Adding."
+#dnsrecord = { "name" => hostname,
+#              "type" => "CNAME",
+#              "data" => publicname,
+#              "gtdLocation" => "DEFAULT",
+#              "ttl" => 300 }
+#post_cname_record(dnsrecord)
+
