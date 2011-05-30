@@ -30,88 +30,99 @@ require 'json'
 require 'socket'
 require 'open-uri'
 
-dmepropertyfile = "dnsmeapi.properties"
+class CNameRecord
+  attr_reader :apiKey, :secretkey, :hmac
+
+  def initialize
+    prophash = load_properties
+
+    @apiKey = prophash["apiKey"]
+    @secretKey = prophash["secretKey"]
+
+    @requestDate = Time.now.httpdate
+    @hmac = OpenSSL::HMAC.hexdigest('sha1', @secretKey, @requestDate)
+
+    @@dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
+
+    #intname = hostname + "-internal." + @domainname
+  end
+
+  def load_properties
+    propertyfile = "dnsmeapi.properties"
+    properties = {}
+    File.open(propertyfile, 'r') do |propertyfile|
+      propertyfile.read.each_line do |line|
+        line.strip!
+        if (line[0] != ?# and line[0] != ?=)
+          i = line.index('=')
+          if (i)
+            properties[line[0..i - 1].strip] = line[i + 1..-1].strip
+          else
+            properties[line] = ''
+          end
+        end
+      end
+    end
+    properties
+  end
+
+  def get_cname_record(name,domainname)
+    response = RestClient.get @@dme_rest_url + domainname + "/records",
+                            :"x-dnsme-apiKey" => @apiKey,
+                            :"x-dnsme-hmac" => @hmac,
+                            :"x-dnsme-requestDate" => @requestDate,
+                            :accept =>:json
+    nameresults = JSON.parse(response.to_str).select {
+                  |x| x["name"] == name and x["type"] == "CNAME"}
+    nameresults[0]
+  end
+
+  def post_cname_record(record,domainname)
+    response = RestClient.post @@dme_rest_url + domainname + "/records",
+                            record.to_json,
+                            :"x-dnsme-apiKey" => @apiKey,
+                            :"x-dnsme-hmac" => @hmac,
+                            :"x-dnsme-requestDate" => @requestDate,
+                            :"accept" =>:json,
+                            :"content-type" =>:json
+    JSON.parse(response)
+  end
+
+  def delete_cname_record(id,domainname)
+    response = RestClient.delete @@dme_rest_url + domainname + "/records/" + id.to_s,
+                            :"x-dnsme-apiKey" => @apiKey,
+                            :"x-dnsme-hmac" => @hmac,
+                            :"x-dnsme-requestDate" => @requestDate,
+                            :accept =>:json
+  end
+end
 
 @@instance_data_url = "http://169.254.169.254/latest/meta-data/"
-@@dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
-
 fqdn = Socket.gethostbyname(Socket.gethostname).first
 publicname = open(@@instance_data_url + 'public-hostname').read + "."
 privatename = open(@@instance_data_url + 'local-hostname').read
 instance_id = open(@@instance_data_url + 'instance-id').read
 hostname = fqdn.split(".")[0]
-@domainname = fqdn.split(".")[1..-1].join(".")
+domainname = fqdn.split(".")[1..-1].join(".")
 
-#intname = hostname + "-internal." + @domainname
+cnameobject = CNameRecord.new
 
-def load_properties(propertyfile)
-  properties = {}
-  File.open(propertyfile, 'r') do |propertyfile|
-    propertyfile.read.each_line do |line|
-      line.strip!
-      if (line[0] != ?# and line[0] != ?=)
-        i = line.index('=')
-        if (i)
-          properties[line[0..i - 1].strip] = line[i + 1..-1].strip
-        else
-          properties[line] = ''
-        end
-      end
-    end
-  end
-  properties
-end
+myhost = cnameobject.get_cname_record(hostname,domainname)
 
-prophash = load_properties dmepropertyfile
-
-@requestDate = Time.now.httpdate
-@apiKey = prophash["apiKey"]
-secretKey = prophash["secretKey"]
-@hmac = OpenSSL::HMAC.hexdigest('sha1', secretKey, @requestDate)
-
-def get_cname_record(name)
-  response = RestClient.get @@dme_rest_url + @domainname + "/records",
-                          :"x-dnsme-apiKey" => @apiKey,
-                          :"x-dnsme-hmac" => @hmac,
-                          :"x-dnsme-requestDate" => @requestDate,
-                          :accept =>:json
-  nameresults = JSON.parse(response.to_str).select {
-                |x| x["name"] == name and x["type"] == "CNAME"}
-  nameresults[0]
-end
-
-def post_cname_record(record)
-  response = RestClient.post @@dme_rest_url + @domainname + "/records",
-                          record.to_json,
-                          :"x-dnsme-apiKey" => @apiKey,
-                          :"x-dnsme-hmac" => @hmac,
-                          :"x-dnsme-requestDate" => @requestDate,
-                          :"accept" =>:json,
-                          :"content-type" =>:json
-  JSON.parse(response)
-end
-
-def delete_cname_record(id)
-  response = RestClient.delete @@dme_rest_url + @domainname + "/records/" + id.to_s,
-                          :"x-dnsme-apiKey" => @apiKey,
-                          :"x-dnsme-hmac" => @hmac,
-                          :"x-dnsme-requestDate" => @requestDate,
-                          :accept =>:json
-end
-
-myhost = get_cname_record(hostname)
 if myhost && myhost["data"] == publicname
-  puts [hostname, @domainname].join(".") + " is correct in DNS"
+  puts [hostname, domainname].join(".") + " is correct in DNS"
   exit
 end
+
 if myhost
   puts "Record is not set correctly. Deleting the record." 
-  delete_cname_record(myhost["id"])
+  cnameobject.delete_cname_record(myhost["id"],domainname)
 end
-puts [hostname, @domainname].join(".") + " doesn't exist in DNS. Adding."
+puts [hostname, domainname].join(".") + " doesn't exist in DNS. Adding."
 dnsrecord = { "name" => hostname,
               "type" => "CNAME",
               "data" => publicname,
               "gtdLocation" => "DEFAULT",
               "ttl" => 300 }
-post_cname_record(dnsrecord)
+cnameobject.post_cname_record(dnsrecord,domainname)
+
