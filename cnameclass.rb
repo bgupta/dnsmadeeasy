@@ -30,23 +30,9 @@ require 'json'
 require 'socket'
 require 'open-uri'
 
-class CNameRecord
-  def initialize(args) 
-    @@instance_data_url = "http://169.254.169.254/latest/meta-data/"
-    @@dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
-
-    fqdn = Socket.gethostbyname(Socket.gethostname).first
-    publicname = open(@@instance_data_url + 'public-hostname').read + "."
-    privatename = open(@@instance_data_url + 'local-hostname').read
-    instance_id = open(@@instance_data_url + 'instance-id').read
-    hostname = fqdn.split(".")[0]
-    @domainname = fqdn.split(".")[1..-1].join(".")
-
-    #intname = hostname + "-internal." + @domainname
-  end
-
-  dmepropertyfile = "dnsmeapi.properties"
-  def load_properties(propertyfile)
+  @requestDate = Time.now.httpdate
+  def load_properties
+    propertyfile = "dnsmeapi.properties"
     properties = {}
     File.open(propertyfile, 'r') do |propertyfile|
       propertyfile.read.each_line do |line|
@@ -63,13 +49,27 @@ class CNameRecord
     end
     properties
   end
+prophash = load_properties
+@apiKey = prophash["apiKey"]
+@secretKey = prophash["secretKey"]
+@hmac = OpenSSL::HMAC.hexdigest('sha1', @secretKey, @requestDate)
 
-  prophash = load_properties dmepropertyfile
+class CNameRecord
+  attr_reader :apiKey, :secretkey, :hmac
 
-  @requestDate = Time.now.httpdate
-  @apiKey = prophash["apiKey"]
-  secretKey = prophash["secretKey"]
-  @hmac = OpenSSL::HMAC.hexdigest('sha1', secretKey, @requestDate)
+  def initialize(args)
+    @@instance_data_url = "http://169.254.169.254/latest/meta-data/"
+    @@dme_rest_url = "http://api.dnsmadeeasy.com/V1.2/domains/"
+
+    fqdn = Socket.gethostbyname(Socket.gethostname).first
+    publicname = open(@@instance_data_url + 'public-hostname').read + "."
+    privatename = open(@@instance_data_url + 'local-hostname').read
+    instance_id = open(@@instance_data_url + 'instance-id').read
+    hostname = fqdn.split(".")[0]
+    @domainname = fqdn.split(".")[1..-1].join(".")
+
+    #intname = hostname + "-internal." + @domainname
+  end
 
   def get_cname_record(name)
     response = RestClient.get @@dme_rest_url + @domainname + "/records",
@@ -102,7 +102,10 @@ class CNameRecord
   end
 end
 
-myhost = CNameRecord.get_cname_record(hostname)
+cnameobject = CNameRecord.new(@apiKey,@secretkey,@hmac)
+
+
+#myhost = CNameRecord.get_cname_record(hostname)
 
 #if myhost && myhost["data"] == publicname
 #  puts [hostname, @domainname].join(".") + " is correct in DNS"
