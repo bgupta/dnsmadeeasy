@@ -31,11 +31,10 @@ require 'socket'
 require 'open-uri'
 
 class CNameRecord
-  attr_reader :apiKey, :secretkey, :hmac
 
-  def initialize
+  def initialize(domainname)
     prophash = load_properties
-
+    @domainname = domainname
     @apiKey = prophash["apiKey"]
     @secretKey = prophash["secretKey"]
 
@@ -66,8 +65,8 @@ class CNameRecord
     properties
   end
 
-  def get_cname_record(name,domainname)
-    response = RestClient.get @@dme_rest_url + domainname + "/records",
+  def get_cname_record(name)
+    response = RestClient.get @@dme_rest_url + @domainname + "/records",
                             :"x-dnsme-apiKey" => @apiKey,
                             :"x-dnsme-hmac" => @hmac,
                             :"x-dnsme-requestDate" => @requestDate,
@@ -77,8 +76,8 @@ class CNameRecord
     nameresults[0]
   end
 
-  def post_cname_record(record,domainname)
-    response = RestClient.post @@dme_rest_url + domainname + "/records",
+  def post_cname_record(record)
+    response = RestClient.post @@dme_rest_url + @domainname + "/records",
                             record.to_json,
                             :"x-dnsme-apiKey" => @apiKey,
                             :"x-dnsme-hmac" => @hmac,
@@ -88,8 +87,8 @@ class CNameRecord
     JSON.parse(response)
   end
 
-  def delete_cname_record(id,domainname)
-    response = RestClient.delete @@dme_rest_url + domainname + "/records/" + id.to_s,
+  def delete_cname_record(id)
+    response = RestClient.delete @@dme_rest_url + @domainname + "/records/" + id.to_s,
                             :"x-dnsme-apiKey" => @apiKey,
                             :"x-dnsme-hmac" => @hmac,
                             :"x-dnsme-requestDate" => @requestDate,
@@ -105,9 +104,9 @@ instance_id = open(@@instance_data_url + 'instance-id').read
 hostname = fqdn.split(".")[0]
 domainname = fqdn.split(".")[1..-1].join(".")
 
-cnameobject = CNameRecord.new
+cnameobject = CNameRecord.new(domainname)
 
-myhost = cnameobject.get_cname_record(hostname,domainname)
+myhost = cnameobject.get_cname_record(hostname)
 
 if myhost && myhost["data"] == publicname
   puts [hostname, domainname].join(".") + " is correct in DNS"
@@ -116,7 +115,7 @@ end
 
 if myhost
   puts "Record is not set correctly. Deleting the record." 
-  cnameobject.delete_cname_record(myhost["id"],domainname)
+  cnameobject.delete_cname_record(myhost["id"])
 end
 puts [hostname, domainname].join(".") + " doesn't exist in DNS. Adding."
 dnsrecord = { "name" => hostname,
@@ -124,5 +123,5 @@ dnsrecord = { "name" => hostname,
               "data" => publicname,
               "gtdLocation" => "DEFAULT",
               "ttl" => 300 }
-cnameobject.post_cname_record(dnsrecord,domainname)
+cnameobject.post_cname_record(dnsrecord)
 
