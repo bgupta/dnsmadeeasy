@@ -109,15 +109,15 @@ cnameobject = CNameRecord.new(domainname)
 myhost = cnameobject.get_cname_record(hostname)
 
 if myhost && myhost["data"] == publicname
-  puts [hostname, domainname].join(".") + " is correct in DNS"
+  #puts [hostname, domainname].join(".") + " is correct in DNS"
   exit
 end
 
 if myhost
-  puts "Record is not set correctly. Deleting the record." 
+  #puts "Record is not set correctly. Deleting the record." 
   cnameobject.delete_cname_record(myhost["id"])
 end
-puts [hostname, domainname].join(".") + " doesn't exist in DNS. Adding."
+#puts [hostname, domainname].join(".") + " doesn't exist in DNS. Adding."
 dnsrecord = { "name" => hostname,
               "type" => "CNAME",
               "data" => publicname,
