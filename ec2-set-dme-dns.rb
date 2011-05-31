@@ -29,6 +29,7 @@ require 'rest_client'
 require 'json'
 require 'socket'
 require 'open-uri'
+require 'optparse'
 
 class CNameRecord
 
@@ -96,6 +97,20 @@ class CNameRecord
   end
 end
 
+options = {}
+OptionParser.new do|opts|
+  opts.banner = "Usage: " + File.basename($0) + " [options] ..."
+
+  options[:verbose] = false
+  opts.on( "-v", "--verbose", "Output more information" ) do
+    options[:verbose] = true
+  end
+  opts.on("-h", "--help", "Display this screen" ) do
+    puts opts
+    exit
+  end
+end.parse!
+
 @@instance_data_url = "http://169.254.169.254/latest/meta-data/"
 fqdn = Socket.gethostbyname(Socket.gethostname).first
 publicname = open(@@instance_data_url + 'public-hostname').read + "."
@@ -109,15 +124,17 @@ cnameobject = CNameRecord.new(domainname)
 myhost = cnameobject.get_cname_record(hostname)
 
 if myhost && myhost["data"] == publicname
-  #puts [hostname, domainname].join(".") + " is correct in DNS"
+  puts [hostname,domainname].join(".") + " is correct in DNS" if options[:verbose]
   exit
 end
 
 if myhost
-  #puts "Record is not set correctly. Deleting the record." 
+  puts "Record is not set correctly. Deleting the record." if options[:verbose]
   cnameobject.delete_cname_record(myhost["id"])
 end
-#puts [hostname, domainname].join(".") + " doesn't exist in DNS. Adding."
+if options[:verbose]
+  puts [hostname,domainname].join(".") + " doesn't exist in DNS. Adding." if options[:verbose]
+end
 dnsrecord = { "name" => hostname,
               "type" => "CNAME",
               "data" => publicname,
