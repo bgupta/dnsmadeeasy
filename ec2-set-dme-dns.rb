@@ -112,7 +112,7 @@ OptionParser.new do|opts|
 end.parse!
 
 @@instance_data_url = "http://169.254.169.254/latest/meta-data/"
-fqdn = Socket.gethostbyname(Socket.gethostname).first
+fqdn = `hostname`[0..-2] # 0..-2 lops off the trailing newline
 publicname = open(@@instance_data_url + 'public-hostname').read + "."
 privatename = open(@@instance_data_url + 'local-hostname').read
 instance_id = open(@@instance_data_url + 'instance-id').read
